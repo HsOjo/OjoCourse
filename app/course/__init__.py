@@ -62,7 +62,15 @@ class CourseController:
             if items is None:
                 return jsonify(error=self.ERR_QUERY_QUERY_FAILED, number=info.number)
 
-            data = [i.data for i in items]
+            data = dict(
+                info=dict(
+                    date=self.course.current_date,
+                    stu_year=self.course.current_stu_year,
+                    week=self.course.current_week,
+                    day=self.course.current_day,
+                ),
+                courses=[i.data for i in items],
+            )
 
             course.data = data_encode(data)
             course.update_time = now
