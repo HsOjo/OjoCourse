@@ -68,19 +68,7 @@ class CourseController:
             if items is None:
                 return jsonify(error=self.ERR_QUERY_QUERY_FAILED, number=info.number)
 
-            courses = []
-
-            if mode == self.QUERY_MODE_ALL:
-                for item in items:
-                    courses.append(item.data)
-            elif mode == self.QUERY_MODE_CURRENT_WEEK:
-                for item in items:
-                    if item.week == self.course.current_week:
-                        courses.append(item.data)
-            elif mode == self.QUERY_MODE_TODAY:
-                for item in items:
-                    if item.week == self.course.current_week and item.day == self.course.current_day:
-                        courses.append(item.data)
+            courses = [item.data for item in items]
 
             course.data = data_encode(courses)
             course.sync_time = now
@@ -90,6 +78,19 @@ class CourseController:
         else:
             courses = data_decode(course.data)
 
+        courses_query = []
+        if mode == self.QUERY_MODE_ALL:
+            for item in courses:
+                courses_query.append(item.data)
+        elif mode == self.QUERY_MODE_CURRENT_WEEK:
+            for item in courses:
+                if item['week'] == self.course.current_week:
+                    courses_query.append(item.data)
+        elif mode == self.QUERY_MODE_TODAY:
+            for item in courses:
+                if item['week'] == self.course.current_week and item['day'] == self.course.current_day:
+                    courses_query.append(item.data)
+
         return jsonify(error=0, data=dict(
             info=dict(
                 date=self.course.current_date,
@@ -97,5 +98,5 @@ class CourseController:
                 week=self.course.current_week,
                 day=self.course.current_day,
             ),
-            courses=courses,
+            courses=courses_query,
         ))
