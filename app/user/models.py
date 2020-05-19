@@ -1,5 +1,4 @@
 from app import db
-from app.course import CourseModel
 
 
 class UserModel(db.Model):
@@ -9,7 +8,7 @@ class UserModel(db.Model):
     password = db.Column(db.VARCHAR(32))
 
     info = db.relationship('UserInfoModel', backref='user', uselist=False)  # type: UserInfoModel
-    course = db.relationship('CourseModel', backref='user', uselist=False)  # type: CourseModel
+    course = db.relationship('CourseModel', backref='user', uselist=False)
 
 
 class UserInfoModel(db.Model):

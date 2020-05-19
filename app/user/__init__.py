@@ -1,5 +1,6 @@
 import hashlib
 import time
+import traceback
 
 from flask import Blueprint, request, Flask, jsonify
 
@@ -33,7 +34,7 @@ class UserController:
             number = data['number']
             password = data['password']
         except:
-            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH)
+            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
 
         if UserModel.query.filter_by(username=username).count() != 0:
             return jsonify(error=self.ERR_REGISTER_EXISTED)
@@ -50,7 +51,7 @@ class UserController:
             username = data['username']
             password = data['password']
         except:
-            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH)
+            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
 
         user = UserModel.query.filter_by(username=username, password=password).first()  # type: UserModel
         if user is not None:

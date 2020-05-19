@@ -1,21 +1,40 @@
+import base64
 import json
 import time
+import traceback
+import zlib
 
 from flask import Blueprint, Flask, request, jsonify
 from szpt_course import Course
 
+import app.user as U
 from .models import CourseModel
 from .. import db
+
+
+def data_encode(data):
+    data = json.dumps(data).encode('ascii')
+    data = zlib.compress(data)
+    return base64.b64encode(data).decode('ascii')
+
+
+def data_decode(data_str: str):
+    data = base64.b64decode(data_str.encode('ascii'))
+    data = zlib.decompress(data)  # type: bytes
+    return json.loads(data.decode('ascii'))
 
 
 class CourseController:
     ERR_COMMON_PARAMS_NOT_MATCH = -1
     ERR_QUERY_TOKEN_INVALID = 1000
+    ERR_QUERY_QUERY_FAILED = 1001
 
     blueprint = Blueprint('course', __name__)
 
-    def __init__(self, app: Flask, config: dict):
+    def __init__(self, app: Flask):
         self.blueprint.add_url_rule('/query', view_func=self.query, methods=['POST'])
+
+        config = app.config.get('COURSE_CONFIG')
         self.course = Course(**config)
 
         app.register_blueprint(self.blueprint, url_prefix='/course')
@@ -26,22 +45,30 @@ class CourseController:
             token = data['token']
             update = data.get('update', False)
         except:
-            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH)
+            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
 
-        info = UserInfoModel.query.filter_by(token=token).first()  # type: UserInfoModel
+        info = U.UserInfoModel.query.filter_by(token=token).first()  # type: U.UserInfoModel
         if info is None:
             return jsonify(error=self.ERR_QUERY_TOKEN_INVALID)
 
         course = CourseModel.query.get(info.user_id)  # type: CourseModel
-        if time.time() - course.update_time > 3600 or update:
-            items = self.course.query(info.number)
-            data = [i.data for i in items]
-            data_str = json.dumps(data)
+        if course is None:
+            course = CourseModel(user_id=info.user_id, update_time=0)
 
-            course.data = data_str
-            course.update_time = time.time()
+        now = int(time.time())
+        if now - course.update_time > 3600 or update:
+            items = self.course.query(info.number)
+            if items is None:
+                return jsonify(error=self.ERR_QUERY_QUERY_FAILED, number=info.number)
+
+            data = [i.data for i in items]
+
+            course.data = data_encode(data)
+            course.update_time = now
 
             db.session.add(course)
             db.session.commit()
+        else:
+            data = data_decode(course.data)
 
-        return jsonify(error=0, data=json.loads(course.data))
+        return jsonify(error=0, data=data)

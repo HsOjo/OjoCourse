@@ -14,6 +14,9 @@ class Application(Flask):
         from .user import UserController
         UserController(self)
 
+        from .course import CourseController
+        CourseController(self)
+
 
 db = SQLAlchemy()
 app = Application()
