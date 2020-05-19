@@ -7,11 +7,12 @@ from flask import Blueprint, request, Flask, jsonify
 from app import db
 from .models import UserModel, UserInfoModel
 
+md5 = lambda x: hashlib.md5(x.encode()).hexdigest()
+
 
 def generate_token(username, number):
     t = '%s,%s,%d' % (username, number, time.time())
-    h = hashlib.md5(t.encode()).hexdigest()
-    return h
+    return md5(t)
 
 
 class UserController:
@@ -32,7 +33,7 @@ class UserController:
             data = request.get_json()
             username = data['username']
             number = data['number']
-            password = data['password']
+            password = md5(data['password'])
         except:
             return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
 
@@ -49,7 +50,7 @@ class UserController:
         try:
             data = request.get_json()
             username = data['username']
-            password = data['password']
+            password = md5(data['password'])
         except:
             return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
 
