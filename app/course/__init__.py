@@ -82,22 +82,20 @@ class CourseController:
                     if item.week == self.course.current_week and item.day == self.course.current_day:
                         courses.append(item.data)
 
-            data = dict(
-                info=dict(
-                    date=self.course.current_date,
-                    stu_year=self.course.current_stu_year,
-                    week=self.course.current_week,
-                    day=self.course.current_day,
-                ),
-                courses=courses,
-            )
-
-            course.data = data_encode(data)
+            course.data = data_encode(courses)
             course.sync_time = now
 
             db.session.add(course)
             db.session.commit()
         else:
-            data = data_decode(course.data)
+            courses = data_decode(course.data)
 
-        return jsonify(error=0, data=data)
+        return jsonify(error=0, data=dict(
+            info=dict(
+                date=self.course.current_date,
+                stu_year=self.course.current_stu_year,
+                week=self.course.current_week,
+                day=self.course.current_day,
+            ),
+            courses=courses,
+        ))
