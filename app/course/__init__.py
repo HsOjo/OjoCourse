@@ -36,6 +36,7 @@ class CourseController:
 
         config = app.config.get('COURSE_CONFIG')
         self.course = Course(**config)
+        self.update_interval = app.config.get('COURSE_UPDATE_INTERVAL')
 
         app.register_blueprint(self.blueprint, url_prefix='/course')
 
@@ -56,7 +57,7 @@ class CourseController:
             course = CourseModel(user_id=info.user_id, update_time=0)
 
         now = int(time.time())
-        if now - course.update_time > 3600 or update:
+        if now - course.update_time >= self.update_interval or update:
             items = self.course.query(info.number)
             if items is None:
                 return jsonify(error=self.ERR_QUERY_QUERY_FAILED, number=info.number)
