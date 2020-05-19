@@ -81,15 +81,15 @@ class CourseController:
         courses_query = []
         if mode == self.QUERY_MODE_ALL:
             for item in courses:
-                courses_query.append(item.data)
+                courses_query.append(item)
         elif mode == self.QUERY_MODE_CURRENT_WEEK:
             for item in courses:
                 if item['week'] == self.course.current_week:
-                    courses_query.append(item.data)
+                    courses_query.append(item)
         elif mode == self.QUERY_MODE_TODAY:
             for item in courses:
                 if item['week'] == self.course.current_week and item['day'] == self.course.current_day:
-                    courses_query.append(item.data)
+                    courses_query.append(item)
 
         return jsonify(error=0, data=dict(
             info=dict(
