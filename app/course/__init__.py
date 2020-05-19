@@ -40,6 +40,7 @@ class CourseController:
 
         config = app.config.get('COURSE_CONFIG')
         self.course = Course(**config)
+        self.course.refresh_state()
         self.sync_interval = app.config.get('COURSE_SYNC_INTERVAL')
 
         app.register_blueprint(self.blueprint, url_prefix='/course')
