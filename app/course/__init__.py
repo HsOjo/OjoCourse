@@ -29,6 +29,10 @@ class CourseController:
     ERR_QUERY_TOKEN_INVALID = 1000
     ERR_QUERY_QUERY_FAILED = 1001
 
+    QUERY_MODE_ALL = 1
+    QUERY_MODE_CURRENT_WEEK = 2
+    QUERY_MODE_TODAY = 3
+
     blueprint = Blueprint('course', __name__)
 
     def __init__(self, app: Flask):
@@ -36,7 +40,7 @@ class CourseController:
 
         config = app.config.get('COURSE_CONFIG')
         self.course = Course(**config)
-        self.update_interval = app.config.get('COURSE_UPDATE_INTERVAL')
+        self.sync_interval = app.config.get('COURSE_SYNC_INTERVAL')
 
         app.register_blueprint(self.blueprint, url_prefix='/course')
 
@@ -44,7 +48,8 @@ class CourseController:
         try:
             data = request.get_json()
             token = data['token']
-            update = data.get('update', False)
+            sync = data.get('sync', False)
+            mode = data.get('mode', self.QUERY_MODE_ALL)
         except:
             return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
 
@@ -57,10 +62,24 @@ class CourseController:
             course = CourseModel(user_id=info.user_id, update_time=0)
 
         now = int(time.time())
-        if now - course.update_time >= self.update_interval or update:
+        if now - course.sync_time >= self.sync_interval or sync:
             items = self.course.query(info.number)
             if items is None:
                 return jsonify(error=self.ERR_QUERY_QUERY_FAILED, number=info.number)
+
+            courses = []
+
+            if mode == self.QUERY_MODE_ALL:
+                for item in items:
+                    courses.append(item.data)
+            elif mode == self.QUERY_MODE_CURRENT_WEEK:
+                for item in items:
+                    if item.week == self.course.current_week:
+                        courses.append(item.data)
+            elif mode == self.QUERY_MODE_TODAY:
+                for item in items:
+                    if item.week == self.course.current_week and item.day == self.course.current_day:
+                        courses.append(item.data)
 
             data = dict(
                 info=dict(
@@ -69,11 +88,11 @@ class CourseController:
                     week=self.course.current_week,
                     day=self.course.current_day,
                 ),
-                courses=[i.data for i in items],
+                courses=courses,
             )
 
             course.data = data_encode(data)
-            course.update_time = now
+            course.sync_time = now
 
             db.session.add(course)
             db.session.commit()

@@ -6,4 +6,4 @@ class CourseModel(db.Model):
     __tablename__ = 'course'
     user_id = db.Column(db.INTEGER, db.ForeignKey(UserModel.id), primary_key=True)
     data = db.Column(db.TEXT)
-    update_time = db.Column(db.INTEGER)
+    sync_time = db.Column(db.INTEGER, default=0)
