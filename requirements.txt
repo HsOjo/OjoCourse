@@ -6,3 +6,4 @@ alembic==1.4.2
 Flask==1.1.2
 SZPT_Course>=0.0.2
 pymysql
+uwsgi
