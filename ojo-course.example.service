@@ -5,8 +5,6 @@ After=network.target
 [Service]
 WorkingDirectory=/opt/OjoCourse
 ExecStart=uwsgi uwsgi.ini
-PrivateTmp=true
-Environment=key=value
 
 [Install]
 WantedBy=multi-user.target
