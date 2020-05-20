@@ -1,0 +1,12 @@
+[Unit]
+Description=OjoCourse UWSGI Daemon
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/OjoCourse
+ExecStart=/opt/OjoCourse/venv/bin/uwsgi uwsgi.ini
+PrivateTmp=true
+Environment=key=value
+
+[Install]
+WantedBy=multi-user.target

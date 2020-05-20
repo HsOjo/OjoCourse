@@ -134,3 +134,4 @@ migrations
 
 config.py
 uwsgi.ini
+ojo-course.service
