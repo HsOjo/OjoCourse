@@ -59,6 +59,10 @@ class UserController:
             user.info.token = generate_token(user.username, user.info.number)
             db.session.add(user)
             db.session.commit()
-            return jsonify(error=0, token=user.info.token)
+            return jsonify(
+                error=0,
+                token=user.info.token,
+                number=user.info.number
+            )
         else:
             return jsonify(error=self.ERR_BIND_USER_NOT_EXISTED)
