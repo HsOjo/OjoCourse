@@ -60,7 +60,7 @@ class CourseController:
 
         course = CourseModel.query.get(info.user_id)  # type: CourseModel
         if course is None:
-            course = CourseModel(user_id=info.user_id, update_time=0)
+            course = CourseModel(user_id=info.user_id, sync_time=0)
 
         now = int(time.time())
         if now - course.sync_time >= self.sync_interval or sync:
