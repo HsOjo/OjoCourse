@@ -26,7 +26,7 @@ def data_decode(data_str: str):
 
 class CourseController:
     ERR_COMMON_PARAMS_NOT_MATCH = -1
-    ERR_QUERY_TOKEN_INVALID = 1000
+    ERR_USER_TOKEN_INVALID = 1000
     ERR_QUERY_QUERY_FAILED = 1001
 
     QUERY_MODE_ALL = 1
@@ -37,6 +37,7 @@ class CourseController:
 
     def __init__(self, app: Flask):
         self.blueprint.add_url_rule('/query', view_func=self.query, methods=['POST'])
+        self.blueprint.add_url_rule('/info', view_func=self.info, methods=['POST'])
 
         config = app.config.get('COURSE_CONFIG')
         self.course = Course(**config)
@@ -56,7 +57,7 @@ class CourseController:
 
         info = U.UserInfoModel.query.filter_by(token=token).first()  # type: U.UserInfoModel
         if info is None:
-            return jsonify(error=self.ERR_QUERY_TOKEN_INVALID)
+            return jsonify(error=self.ERR_USER_TOKEN_INVALID)
 
         course = CourseModel.query.get(info.user_id)  # type: CourseModel
         if course is None:
@@ -92,11 +93,26 @@ class CourseController:
                     courses_query.append(item)
 
         return jsonify(error=0, data=dict(
-            info=dict(
+            courses=courses_query,
+        ))
+
+    def info(self):
+        try:
+            data = request.get_json()
+            token = data['token']
+        except:
+            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
+
+        info = U.UserInfoModel.query.filter_by(token=token).first()  # type: U.UserInfoModel
+        if info is None:
+            return jsonify(error=self.ERR_USER_TOKEN_INVALID)
+
+        return jsonify(error=0, data=dict(
+            current_info=dict(
                 date=self.course.current_date,
                 stu_year=self.course.current_stu_year,
                 week=self.course.current_week,
                 day=self.course.current_day,
             ),
-            courses=courses_query,
+            dates=self.course.dates,
         ))
