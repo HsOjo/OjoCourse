@@ -47,11 +47,11 @@ class CourseService:
         now = int(time.time())
         if now - course.sync_time >= self.sync_interval or sync:
             info = self.course.query(user_info.number)
+            if info is None:
+                raise self.CourseQueryFailedException(dict(number=user_info.number))
+
             items = info['courses']
             user_info.name = info['name']
-
-            if items is None:
-                raise self.CourseQueryFailedException(dict(number=user_info.number))
 
             courses_items = [item.data for item in items]
 

@@ -32,7 +32,10 @@ class UserController(APIController):
             raise self.ParamsNotMatchException
 
         user_info = self.service.register(username, password, number)
-        self.service_course.query(user_info.token, True, mode=-1)
+        try:
+            self.service_course.query(user_info.token, True, mode=-1)
+        except:
+            pass
         user_info = self.service.get_user_info(user_info.token)
 
         return self.make_response(
