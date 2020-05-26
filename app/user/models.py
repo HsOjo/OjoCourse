@@ -15,4 +15,5 @@ class UserInfoModel(db.Model):
     __tablename__ = 'user_info'
     user_id = db.Column(db.INTEGER, db.ForeignKey(UserModel.id), primary_key=True)
     number = db.Column(db.VARCHAR(32))
+    name = db.Column(db.VARCHAR(32))
     token = db.Column(db.VARCHAR(64), unique=True)

@@ -1,68 +1,57 @@
-import hashlib
-import time
-import traceback
+from flask import request, Flask
 
-from flask import Blueprint, request, Flask, jsonify
-
-from app import db
 from .models import UserModel, UserInfoModel
-
-md5 = lambda x: hashlib.md5(x.encode()).hexdigest()
-
-
-def generate_token(username, number):
-    t = '%s,%s,%d' % (username, number, time.time())
-    return md5(t)
+from .sevice import UserService
+from ..base import APIController
+from ..course import CourseService
 
 
-class UserController:
-    ERR_COMMON_PARAMS_NOT_MATCH = -1
-    ERR_REGISTER_EXISTED = 1000
-    ERR_BIND_USER_NOT_EXISTED = 2000
-
-    blueprint = Blueprint('user', __name__)
+class UserController(APIController):
+    import_name = __name__
 
     def __init__(self, app: Flask):
-        self.blueprint.add_url_rule('/register', view_func=self.register, methods=['POST'])
-        self.blueprint.add_url_rule('/bind', view_func=self.bind, methods=['POST'])
+        super().__init__(app)
+        self.service = UserService()
 
-        app.register_blueprint(self.blueprint, url_prefix='/user')
+        self.service_course = CourseService(
+            course_config=app.config.get('COURSE_CONFIG'),
+            sync_interval=app.config.get('COURSE_SYNC_INTERVAL'),
+        )
+
+    def callback_add_routes(self):
+        self.add_route('/register', view_func=self.register, methods=['POST'])
+        self.add_route('/bind', view_func=self.bind, methods=['POST'])
 
     def register(self):
         try:
             data = request.get_json()
             username = data['username']
+            password = data['password']
             number = data['number']
-            password = md5(data['password'])
         except:
-            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
+            raise self.ParamsNotMatchException
 
-        if UserModel.query.filter_by(username=username).count() != 0:
-            return jsonify(error=self.ERR_REGISTER_EXISTED)
-        else:
-            token = generate_token(username, number)
-            user = UserModel(username=username, password=password, info=UserInfoModel(number=number, token=token))
-            db.session.add(user)
-            db.session.commit()
-            return jsonify(error=0, token=user.info.token)
+        user_info = self.service.register(username, password, number)
+        self.service_course.query(user_info.token, True, mode=-1)
+        user_info = self.service.get_user_info(user_info.token)
+
+        return self.make_response(
+            token=user_info.token,
+            number=user_info.number,
+            name=user_info.name,
+        )
 
     def bind(self):
         try:
             data = request.get_json()
             username = data['username']
-            password = md5(data['password'])
+            password = data['password']
         except:
-            return jsonify(error=self.ERR_COMMON_PARAMS_NOT_MATCH, exc=traceback.format_exc())
+            raise self.ParamsNotMatchException
 
-        user = UserModel.query.filter_by(username=username, password=password).first()  # type: UserModel
-        if user is not None:
-            user.info.token = generate_token(user.username, user.info.number)
-            db.session.add(user)
-            db.session.commit()
-            return jsonify(
-                error=0,
-                token=user.info.token,
-                number=user.info.number
-            )
-        else:
-            return jsonify(error=self.ERR_BIND_USER_NOT_EXISTED)
+        user_info = self.service.bind(username, password)
+        return self.make_response(
+            token=user_info.token,
+            number=user_info.number,
+            name=user_info.name,
+        )
