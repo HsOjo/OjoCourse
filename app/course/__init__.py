@@ -1,8 +1,10 @@
 import base64
+import datetime
 import json
 import time
 import traceback
 import zlib
+from typing import Dict
 
 from flask import Blueprint, Flask, request, jsonify
 from szpt_course import Course
@@ -71,7 +73,13 @@ class CourseController:
 
             courses = [item.data for item in items]
 
+            count = {}
+            for item in items:
+                c = count.get(item.week, 0)
+                count[item.week] = c + 1
+
             course.data = data_encode(courses)
+            course.count = json.dumps(count)
             course.sync_time = now
 
             db.session.add(course)
@@ -107,12 +115,37 @@ class CourseController:
         if info is None:
             return jsonify(error=self.ERR_USER_TOKEN_INVALID)
 
+        current_info = dict(
+            date=self.course.current_date,
+            stu_year=self.course.current_stu_year,
+            week=self.course.current_week,
+            day=self.course.current_day,
+        )
+        dates = self.course.dates.copy()
+
+        cw, cd = current_info['week'], current_info['day']
+
+        date_c = datetime.datetime.strptime(current_info['date'], '%Y-%m-%d')
+        date_d = datetime.datetime.strptime(dates[cw - 1][cd], '%Y-%m-%d')
+
+        if date_c != date_d:
+            td_w = (date_d - date_c).days / 7
+            if td_w > 0:
+                course = CourseModel.query.get(info.user_id)  # type: CourseModel
+                if course is not None and course.count is not None:
+                    count = json.loads(course.count)  # type: Dict[str, int]
+                    for i in range(cw - 1, -1, -1):
+                        if count.get('%s' % (i + 1), 0) == 0:
+                            dates.insert(i, {})
+                            td_w -= 1
+                        if td_w == 0:
+                            break
+
+        dates_info = {}
+        for i, date_w in enumerate(dates, start=1):
+            dates_info[i] = date_w
+
         return jsonify(error=0, data=dict(
-            current_info=dict(
-                date=self.course.current_date,
-                stu_year=self.course.current_stu_year,
-                week=self.course.current_week,
-                day=self.course.current_day,
-            ),
-            dates=self.course.dates,
+            current_info=current_info,
+            dates=dates_info,
         ))
