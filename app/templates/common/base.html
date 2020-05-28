@@ -1,0 +1,16 @@
+{# 前台基准模版，加载了站点设置与博客信息设置 #}
+
+{% extends 'bootstrap/base.html' %}
+{% import 'bootstrap/utils.html' as utils %}
+
+{% block navbar %}
+    {# 加载导航栏 #}
+    {% include 'common/nav.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container" style="margin-bottom: 16px; padding-top: 72px;">
+        {{ utils.flashed_messages() }}
+        {% block content_inner %}{% endblock %}
+    </div>
+{% endblock %}

@@ -1,4 +1,6 @@
-from flask import request, Flask
+from io import BytesIO
+
+from flask import request, send_file, abort
 
 from .models import UserModel, UserInfoModel
 from .sevice import UserService
@@ -9,18 +11,15 @@ from ..course import CourseService
 class UserController(APIController):
     import_name = __name__
 
-    def __init__(self, app: Flask):
+    def __init__(self, app):
         super().__init__(app)
         self.service = UserService()
-
-        self.service_course = CourseService(
-            course_config=app.config.get('COURSE_CONFIG'),
-            sync_interval=app.config.get('COURSE_SYNC_INTERVAL'),
-        )
+        self.service_course = CourseService()
 
     def callback_add_routes(self):
         self.add_route('/register', view_func=self.register, methods=['POST'])
         self.add_route('/bind', view_func=self.bind, methods=['POST'])
+        self.add_route('/face/<string:token>', view_func=self.face)
 
     def register(self):
         try:
@@ -28,6 +27,8 @@ class UserController(APIController):
             username = data['username']
             password = data['password']
             number = data['number']
+            if '' in [username, password, number]:
+                raise self.ParamsNotMatchException
         except:
             raise self.ParamsNotMatchException
 
@@ -58,3 +59,11 @@ class UserController(APIController):
             number=user_info.number,
             name=user_info.name,
         )
+
+    def face(self, token: str = ''):
+        user_info = UserService.get_user_info(token)
+        img_data = self.service.get_face(user_info.number)
+        if img_data is not None:
+            return send_file(BytesIO(img_data), 'image/jpeg')
+        else:
+            return abort(500)

@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import request
 
 from .models import CourseModel
 from .service import CourseService
@@ -8,13 +8,9 @@ from ..base import APIController
 class CourseController(APIController):
     import_name = __name__
 
-    def __init__(self, app: Flask):
+    def __init__(self, app):
         super().__init__(app)
-
-        self.service = CourseService(
-            course_config=app.config.get('COURSE_CONFIG'),
-            sync_interval=app.config.get('COURSE_SYNC_INTERVAL'),
-        )
+        self.service = CourseService()
 
     def callback_add_routes(self):
         self.add_route('/query', view_func=self.query, methods=['POST'])

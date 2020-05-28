@@ -1,14 +1,24 @@
 import hashlib
+import os
 import time
 
 from app import db
 from app.base.api_controller import APIErrorException
+from app.common import get_data_path, get_config
 from app.user import UserModel, UserInfoModel
+from app.utils.edu_admin import EduAdmin
 
 md5 = lambda x: hashlib.md5(x.encode()).hexdigest()
 
 
 class UserService:
+    def __init__(self):
+        edu_admin_config = get_config('EDU_ADMIN_CONFIG')
+        if edu_admin_config is not None:
+            self.edu_admin = EduAdmin(**edu_admin_config)
+        else:
+            self.edu_admin = None
+
     class UserExistedException(APIErrorException):
         code = 1001
 
@@ -41,6 +51,27 @@ class UserService:
             raise self.UserNotExistedException
 
         return user.info
+
+    def get_face(self, number):
+        path = '%s/%s.jpg' % (get_data_path(), number)
+        img_data = None
+
+        if os.path.exists(path):
+            with open(path, 'rb') as io:
+                img_data = io.read()
+        else:
+            if self.edu_admin is not None:
+                img_data = self.edu_admin.get_face(number)
+            if img_data is not None:
+                with open(path, 'wb') as io:
+                    io.write(img_data)
+        return img_data
+
+    @staticmethod
+    def get_user(username, password):
+        password = md5(password)
+        user = UserModel.query.filter_by(username=username, password=password).first()  # type: UserModel
+        return user
 
     @staticmethod
     def get_user_info(token: str):

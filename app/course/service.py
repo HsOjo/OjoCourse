@@ -9,6 +9,7 @@ from szpt_course import Course
 
 from app import db
 from app.base.api_controller import APIErrorException
+from app.common import get_config
 from app.course import CourseModel
 from app.user import UserService
 
@@ -33,11 +34,11 @@ class CourseService:
     class CourseQueryFailedException(APIErrorException):
         code = 2001
 
-    def __init__(self, course_config, sync_interval):
-        self.course = Course(**course_config)
-        self.sync_interval = sync_interval
+    def __init__(self):
+        self.course = Course(**get_config('COURSE_CONFIG'))
+        self.sync_interval = get_config('COURSE_SYNC_INTERVAL', 3600)
 
-    def query(self, token, sync: bool, mode: int):
+    def query(self, token, sync: bool, mode: int = 0):
         user_info = UserService.get_user_info(token)
 
         course = CourseModel.query.get(user_info.user_id)  # type: CourseModel

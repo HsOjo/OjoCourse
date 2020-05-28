@@ -1,0 +1,36 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}用户管理{% endblock %}
+
+{% import 'bootstrap/pagination.html' as pagi %}
+
+{% block content_inner %}
+    <ul id="tab" class="nav nav-tabs">
+        <li class="active"><a href="{{ url_for('admin.user.index') }}">用户列表</a></li>
+    </ul>
+    <table class="table">
+        <tr>
+            <th>id</th>
+            <th>用户名</th>
+            <th>姓名</th>
+            <th>学号</th>
+            <th>同步时间</th>
+            <th>操作</th>
+        </tr>
+        {% for item in pagination.items %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.username }}</td>
+                <td>{{ item.info.name or '（无）' }}</td>
+                <td>{{ item.info.number or '（无）' }}</td>
+                <td>{{ item.course.sync_time | convert_time }}</td>
+                <td>
+                    <a href="{{ url_for('user.face', token=item.info.token) }}">查看头像</a>
+                    <a href="{{ url_for('admin.user.edit', id=item.id) }}">编辑</a>
+                    <a href="{{ url_for('admin.user.delete', id=item.id) }}">删除</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {{ pagi.render_pagination(pagination) }}
+{% endblock %}
