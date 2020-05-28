@@ -24,18 +24,16 @@ class AdminController(AdminBaseController):
 
     def login(self):
         user = get_current_user()
-        if not user.is_anonymous:
+        if not user.is_anonymous and user.admin:
             return redirect(url_for('admin.index'))
 
         form = LoginForm()
         if request.method == 'POST' and form.validate_on_submit():
             user = UserService.get_user(form.username.data, form.password.data)
-            if user is not None:
-                admin = user.admin  # type: AdminModel
-                if admin is not None:
-                    login_user(user, form.remember.data)
-                    flash('登录成功', 'success')
-                    return redirect(url_for('admin.index'))
+            if user is not None and user.admin:
+                login_user(user, form.remember.data)
+                flash('登录成功', 'success')
+                return redirect(url_for('admin.index'))
             flash('登录失败', 'danger')
         return render_template('common/form.html', title='Login', form=form)
 
