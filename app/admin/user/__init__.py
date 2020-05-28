@@ -26,13 +26,17 @@ class AdminUserController(AdminBaseController):
         form = UserEditForm()
         if request.method == 'POST' and form.validate_on_submit():
             item.username = form.username.data
-            item.password = form.password.data
+            if form.password.data != '':
+                item.password = form.password.data
             item.info.number = form.number.data
 
             db.session.add(item)
             db.session.commit()
 
             flash('编辑成功', 'success')
+        else:
+            form.username.data = item.username
+            form.number.data = item.info.number
 
         return render_template('admin/user/edit.html', form=form)
 
