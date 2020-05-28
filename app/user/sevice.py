@@ -52,8 +52,8 @@ class UserService:
 
         return user.info
 
-    def get_face(self, number):
-        path = '%s/%s.jpg' % (get_data_path(), number)
+    def download_face(self, number):
+        path = os.path.abspath('%s/%s.jpg' % (get_data_path(), number))
         img_data = None
 
         if os.path.exists(path):
@@ -61,11 +61,11 @@ class UserService:
                 img_data = io.read()
         else:
             if self.edu_admin is not None:
-                img_data = self.edu_admin.get_face(number)
+                img_data = self.edu_admin.download_face(number)
             if img_data is not None:
                 with open(path, 'wb') as io:
                     io.write(img_data)
-        return img_data
+        return path
 
     @staticmethod
     def get_user(username, password):

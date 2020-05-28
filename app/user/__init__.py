@@ -1,5 +1,3 @@
-from io import BytesIO
-
 from flask import request, send_file, abort
 
 from .models import UserModel, UserInfoModel
@@ -62,8 +60,8 @@ class UserController(APIController):
 
     def face(self, token: str = ''):
         user_info = UserService.get_user_info(token)
-        img_data = self.service.get_face(user_info.number)
-        if img_data is not None:
-            return send_file(BytesIO(img_data), 'image/jpeg')
+        path = self.service.download_face(user_info.number)
+        if path is not None:
+            return send_file(path, 'image/jpeg')
         else:
             return abort(500)
