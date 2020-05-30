@@ -21,11 +21,12 @@ class CourseController(APIController):
             data = request.get_json()
             token = data['token']
             sync = data.get('sync', False)
-            mode = data.get('mode', CourseService.QUERY_MODE_ALL)
+            week = data.get('week')
+            day = data.get('day')
         except:
             raise self.ParamsNotMatchException
 
-        courses = self.service.query(token, sync, mode)
+        courses = self.service.query(token, sync, week, day)
         return self.make_response(courses=courses)
 
     def info(self):

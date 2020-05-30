@@ -27,10 +27,6 @@ def data_decode(data_str: str):
 
 
 class CourseService:
-    QUERY_MODE_ALL = 1
-    QUERY_MODE_CURRENT_WEEK = 2
-    QUERY_MODE_TODAY = 3
-
     class CourseQueryFailedException(APIErrorException):
         code = 2001
 
@@ -38,7 +34,7 @@ class CourseService:
         self.course = Course(**get_config('COURSE_CONFIG'))
         self.sync_interval = get_config('COURSE_SYNC_INTERVAL', 3600)
 
-    def query(self, token, sync: bool, mode: int = 0):
+    def query(self, token, sync: bool, week: int = None, day: int = None):
         user_info = UserService.get_user_info(token)
 
         course = CourseModel.query.get(user_info.user_id)  # type: CourseModel
@@ -72,17 +68,9 @@ class CourseService:
             courses_items = data_decode(course.data)
 
         courses = []
-        if mode == self.QUERY_MODE_ALL:
-            for item in courses_items:
+        for item in courses_items:
+            if (week is None or item['week'] == week) and (day is None or item['day'] == day):
                 courses.append(item)
-        elif mode == self.QUERY_MODE_CURRENT_WEEK:
-            for item in courses_items:
-                if item['week'] == self.course.current_week:
-                    courses.append(item)
-        elif mode == self.QUERY_MODE_TODAY:
-            for item in courses_items:
-                if item['week'] == self.course.current_week and item['day'] == self.course.current_day:
-                    courses.append(item)
 
         return courses
 
