@@ -34,7 +34,7 @@ class CourseService:
         self.course = Course(**get_config('COURSE_CONFIG'))
         self.sync_interval = get_config('COURSE_SYNC_INTERVAL', 3600)
 
-    def query(self, token, sync: bool, week: int = None, day: int = None):
+    def query(self, token, sync: bool, week: int, day: int):
         user_info = UserService.get_user_info(token)
 
         course = CourseModel.query.get(user_info.user_id)  # type: CourseModel
@@ -69,7 +69,7 @@ class CourseService:
 
         courses = []
         for item in courses_items:
-            if (week is None or item['week'] == week) and (day is None or item['day'] == day):
+            if (week == -1 or item['week'] == week) and (day == -1 or item['day'] == day):
                 courses.append(item)
 
         return courses

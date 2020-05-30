@@ -21,8 +21,8 @@ class CourseController(APIController):
             data = request.get_json()
             token = data['token']
             sync = data.get('sync', False)
-            week = data.get('week')
-            day = data.get('day')
+            week = data.get('week', -1)
+            day = data.get('day', -1)
         except:
             raise self.ParamsNotMatchException
 
