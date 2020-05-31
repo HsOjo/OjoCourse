@@ -34,7 +34,7 @@ class CourseService:
         self.course = Course(**get_config('COURSE_CONFIG'))
         self.sync_interval = get_config('COURSE_SYNC_INTERVAL', 3600)
 
-    def query(self, token, sync: bool, week: int, day: int):
+    def query(self, token, sync: bool, week: int=-1, day: int=-1):
         user_info = UserService.get_user_info(token)
 
         course = CourseModel.query.get(user_info.user_id)  # type: CourseModel

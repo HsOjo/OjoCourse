@@ -4,6 +4,7 @@ from app import db
 from app.admin import AdminBaseController
 from app.user import UserModel
 from .forms import UserEditForm
+from ...course import CourseService
 
 
 class AdminUserController(AdminBaseController):
@@ -13,6 +14,7 @@ class AdminUserController(AdminBaseController):
         self.add_route('/', self.index)
         self.add_route('/edit/<int:id>', self.edit)
         self.add_route('/delete/<int:id>', self.delete)
+        self.add_route('/sync_course/<int:id>', self.sync_course)
 
     def index(self):
         pagination = UserModel.query.paginate(None, 20)
@@ -54,4 +56,17 @@ class AdminUserController(AdminBaseController):
         db.session.commit()
 
         flash('删除成功', 'success')
+        return redirect(url_for('admin.user.index'))
+
+    def sync_course(self, id: int):
+        item = UserModel.query.get(id)  # type: UserModel
+        if item is None:
+            flash('用户不存在', 'danger')
+
+        try:
+            CourseService().query(item.info.token, True)
+            flash('同步成功')
+        except Exception as e:
+            flash('同步失败 - %a' % e)
+
         return redirect(url_for('admin.user.index'))

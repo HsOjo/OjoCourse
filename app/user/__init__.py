@@ -32,7 +32,7 @@ class UserController(APIController):
 
         user_info = self.service.register(username, password, number)
         try:
-            self.service_course.query(user_info.token, True, mode=-1)
+            self.service_course.query(user_info.token, True)
         except:
             pass
         user_info = self.service.get_user_info(user_info.token)
