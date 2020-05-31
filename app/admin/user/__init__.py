@@ -50,7 +50,8 @@ class AdminUserController(AdminBaseController):
         if item.admin:
             db.session.delete(item.admin)
         db.session.delete(item.info)
-        db.session.delete(item.course)
+        if item.course:
+            db.session.delete(item.course)
         db.session.commit()
         db.session.delete(item)
         db.session.commit()
