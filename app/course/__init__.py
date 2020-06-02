@@ -36,5 +36,6 @@ class CourseController(APIController):
         except:
             raise self.ParamsNotMatchException
 
+        self.service.query(token, False)
         info = self.service.info(token)
         return self.make_response(**info)
