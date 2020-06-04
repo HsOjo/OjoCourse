@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/OjoCourse
-ExecStart=uwsgi uwsgi.ini
+ExecStart=/opt/OjoCourse/venv/bin/uwsgi uwsgi.ini
 
 [Install]
 WantedBy=multi-user.target
