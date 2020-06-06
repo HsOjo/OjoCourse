@@ -57,7 +57,7 @@ class AdminController(AdminBaseController):
             service = UserService()
             user_info: UserInfoModel
             for user_info in users_info:
-                service.download_face(user_info.number)
+                service.get_face(user_info.number)
             flash('获取完成', 'success')
 
         return render_template('admin/form.html', title='后台首页', form=form)

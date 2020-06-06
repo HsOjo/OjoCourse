@@ -13,11 +13,11 @@ md5 = lambda x: hashlib.md5(x.encode()).hexdigest()
 
 class UserService:
     def __init__(self):
+        self.edu_admin = None
+        
         edu_admin_config = get_config('EDU_ADMIN_CONFIG')
         if edu_admin_config is not None:
             self.edu_admin = EduAdmin(**edu_admin_config)
-        else:
-            self.edu_admin = None
 
     class UserExistedException(APIErrorException):
         code = 1001
@@ -52,16 +52,13 @@ class UserService:
 
         return user.info
 
-    def download_face(self, number):
+    def get_face(self, number):
         path = os.path.abspath('%s/%s.jpg' % (get_data_path(), number))
         img_data = None
 
-        if os.path.exists(path):
-            with open(path, 'rb') as io:
-                img_data = io.read()
-        else:
+        if not os.path.exists(path):
             if self.edu_admin is not None:
-                img_data = self.edu_admin.download_face(number)
+                img_data = self.edu_admin.get_face(number)
             if img_data is not None:
                 with open(path, 'wb') as io:
                     io.write(img_data)

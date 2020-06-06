@@ -60,7 +60,7 @@ class UserController(APIController):
 
     def face(self, token: str = ''):
         user_info = UserService.get_user_info(token)
-        path = self.service.download_face(user_info.number)
+        path = self.service.get_face(user_info.number)
         if path is not None:
             return send_file(path, 'image/jpeg')
         else:
