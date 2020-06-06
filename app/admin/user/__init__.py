@@ -12,7 +12,7 @@ class AdminUserController(AdminBaseController):
 
     def callback_add_routes(self):
         self.add_route('/', self.index)
-        self.add_route('/edit/<int:id>', self.edit)
+        self.add_route('/edit/<int:id>', self.edit, methods=['GET', 'POST'])
         self.add_route('/delete/<int:id>', self.delete)
         self.add_route('/sync_course/<int:id>', self.sync_course)
 
