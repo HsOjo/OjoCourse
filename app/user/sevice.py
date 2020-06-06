@@ -14,7 +14,7 @@ md5 = lambda x: hashlib.md5(x.encode()).hexdigest()
 class UserService:
     def __init__(self):
         self.edu_admin = None
-        
+
         edu_admin_config = get_config('EDU_ADMIN_CONFIG')
         if edu_admin_config is not None:
             self.edu_admin = EduAdmin(**edu_admin_config)

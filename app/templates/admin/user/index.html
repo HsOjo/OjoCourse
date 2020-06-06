@@ -23,13 +23,14 @@
                 <td>{{ item.username }}</td>
                 <td>{{ item.info.name or '（无）' }}</td>
                 <td>{{ item.info.number or '（无）' }}</td>
-                <td>{% if item.course %}{{ item.course.sync_time | convert_time}}{% else %}（从未同步）{% endif %}</td>
+                <td>{% if item.course %}{{ item.course.sync_time | convert_time }}{% else %}（从未同步）{% endif %}</td>
                 <td>
-                    <a class="btn btn-xs btn-warning" href="javascript:openModal('{{ item.info.name }}', '{{ url_for('user.face', token=item.info.token) }}')">查看头像</a>
-                    <a class="btn btn-xs btn-info"  href="{{ url_for('admin.user.sync_course', id=item.id) }}">同步课程</a>
+                    <a class="btn btn-xs btn-warning"
+                       href="javascript:openModal('{{ item.info.name }}', '{{ url_for('user.face', token=item.info.token) }}')">查看头像</a>
+                    <a class="btn btn-xs btn-info" href="{{ url_for('admin.user.sync_course', id=item.id) }}">同步课程</a>
                     <br>
-                    <a class="btn btn-xs btn-default"  href="{{ url_for('admin.user.edit', id=item.id) }}">编辑</a>
-                    <a class="btn btn-xs btn-danger"  href="{{ url_for('admin.user.delete', id=item.id) }}">删除</a>
+                    <a class="btn btn-xs btn-default" href="{{ url_for('admin.user.edit', id=item.id) }}">编辑</a>
+                    <a class="btn btn-xs btn-danger" href="{{ url_for('admin.user.delete', id=item.id) }}">删除</a>
                 </td>
             </tr>
         {% endfor %}

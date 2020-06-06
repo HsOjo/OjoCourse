@@ -1,2 +1,2 @@
-from .controller import Controller
 from .api_controller import APIController
+from .controller import Controller
