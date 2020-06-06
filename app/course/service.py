@@ -29,6 +29,7 @@ def data_decode(data_str: str):
 class CourseService:
     class CourseQueryFailedException(APIErrorException):
         code = 2001
+        msg = '课程查询失败，请稍后重试。'
 
     def __init__(self):
         self.course = Course(**get_config('COURSE_CONFIG'))

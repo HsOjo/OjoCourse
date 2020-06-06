@@ -21,12 +21,15 @@ class UserService:
 
     class UserExistedException(APIErrorException):
         code = 1001
+        msg = '注册失败，用户已存在。'
 
     class UserNotExistedException(APIErrorException):
         code = 1002
+        msg = '登录失败，用户名或密码错误。'
 
     class UserTokenInvalidException(APIErrorException):
         code = 1003
+        msg = '用户Token失效，请重新登录账号。'
 
     def register(self, username, password, number):
         password = md5(password)
