@@ -1,10 +1,7 @@
-{# 后台基准模版，结构上与前台基准模版差异不大 #}
-
 {% extends 'bootstrap/base.html' %}
 {% import 'bootstrap/utils.html' as utils %}
 
 {% block navbar %}
-    {# 加载导航栏 #}
     {% include 'common/nav.html' %}
 {% endblock %}
 
@@ -16,7 +13,6 @@
 {% block content %}
     <div class="container-fluid" style="padding-top: 72px;">
         <div class="row">
-            {# 加载后台页面左边菜单栏 #}
             {% include 'admin/left.html' %}
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                 {{ utils.flashed_messages() }}
