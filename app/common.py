@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 from flask import Config, Flask
@@ -28,3 +29,6 @@ def register_all_callable_object_from_package(pkg, is_filter=False):
                 current_app.add_template_filter(f)
             else:
                 current_app.add_template_global(f)
+
+
+md5 = lambda x: hashlib.md5(x.encode()).hexdigest()

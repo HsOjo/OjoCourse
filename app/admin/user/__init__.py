@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request
 
-from app import db
+from app import db, common
 from app.admin import AdminBaseController
 from app.user import UserModel
 from .forms import UserEditForm
@@ -29,7 +29,7 @@ class AdminUserController(AdminBaseController):
         if request.method == 'POST' and form.validate_on_submit():
             item.username = form.username.data
             if form.password.data != '':
-                item.password = form.password.data
+                item.password = common.md5(form.password.data)
             item.info.number = form.number.data
 
             db.session.add(item)

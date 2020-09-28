@@ -1,14 +1,11 @@
-import hashlib
 import os
 import time
 
-from app import db
+from app import db, common
 from app.base.api_controller import APIErrorException
 from app.common import get_data_path, get_config
 from app.user import UserModel, UserInfoModel
 from app.utils.edu_admin import EduAdmin
-
-md5 = lambda x: hashlib.md5(x.encode()).hexdigest()
 
 
 class UserService:
@@ -32,7 +29,7 @@ class UserService:
         msg = '用户Token失效，请重新登录账号。'
 
     def register(self, username, password, number):
-        password = md5(password)
+        password = common.md5(password)
         if UserModel.query.filter_by(username=username).count() != 0:
             raise self.UserExistedException
 
@@ -44,7 +41,7 @@ class UserService:
         return user.info
 
     def bind(self, username, password):
-        password = md5(password)
+        password = common.md5(password)
         user = UserModel.query.filter_by(username=username, password=password).first()  # type: UserModel
         if user is not None:
             user.info.token = self.generate_token(user.username, user.info.number)
@@ -69,7 +66,7 @@ class UserService:
 
     @staticmethod
     def get_user(username, password):
-        password = md5(password)
+        password = common.md5(password)
         user = UserModel.query.filter_by(username=username, password=password).first()  # type: UserModel
         return user
 
@@ -83,4 +80,4 @@ class UserService:
     @staticmethod
     def generate_token(username, number):
         t = '%s,%s,%d' % (username, number, time.time())
-        return md5(t)
+        return common.md5(t)
