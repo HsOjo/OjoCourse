@@ -14,8 +14,8 @@ class Application(Flask):
         super().__init__(__name__)
 
         program_path = os.path.join(self.root_path, '..')
-        self.config.from_pyfile('%s/config.py' % program_path)
-        os.makedirs('%s/data' % program_path, exist_ok=True)
+        self.config.from_pyfile(os.path.join(program_path, 'config.py'))
+        os.makedirs(os.path.join(program_path, 'data'), exist_ok=True)
 
         common.current_app = self
         db.init_app(self)
